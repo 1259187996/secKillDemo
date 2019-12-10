@@ -33,7 +33,10 @@ public class SchoolServiceImpl {
             JSONArray arr = json.getJSONObject("data").getJSONArray("item");
             for(int j = 0 ; j < arr.size() ; j++){
                 JSONObject rs = arr.getJSONObject(j);
-                mongDbUtil.insert("School",rs);
+                String schoolId = rs.getString("school_id");
+                String infoStr = restTemplate.getForObject("https://static-data.eol.cn/www/school/" + schoolId + "/info.json", String.class);
+                JSONObject infoJson = JSON.parseObject(infoStr);
+                mongDbUtil.insert("SchoolDetail",infoJson);
             }
 
         }
