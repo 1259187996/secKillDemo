@@ -8,6 +8,7 @@ import com.demo.service.AliQueueServiceImpl;
 import com.demo.service.SchoolServiceImpl;
 import com.demo.vo.TestVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -31,6 +32,9 @@ public class TestController {
     private SchoolServiceImpl schoolService;
 
     private int count = 5;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
 
 
@@ -126,6 +130,20 @@ public class TestController {
     public RespModel getSchools(){
         schoolService.getSchools();
         return new RespModel();
+    }
+
+    @GetMapping("redis")
+    public RespModel redis(){
+        RespModel respModel = new RespModel();
+        String str = (String)redisTemplate.opsForValue().get("test");
+        if(str==null){
+            redisTemplate.opsForValue().set("test","test");
+        }else{
+            System.out.println(str);
+            respModel.setData(str);
+            return respModel;
+        }
+        return respModel;
     }
 
 }
