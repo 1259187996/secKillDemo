@@ -1,17 +1,23 @@
 package com.demo.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.aliyun.mns.model.Message;
 import com.demo.dto.RespModel;
 import com.demo.dto.TestDTO;
+import com.demo.model.JSONResult;
+import com.demo.model.PageData;
 import com.demo.service.AliQueueServiceImpl;
 import com.demo.service.SchoolServiceImpl;
+import com.demo.util.RedisUtils;
+import com.demo.vo.AppQuestionVO;
 import com.demo.vo.TestVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -35,6 +41,12 @@ public class TestController {
 
     @Autowired
     private RedisTemplate redisTemplate;
+
+    @Autowired
+    private RedisUtils redisUtils;
+
+    public static final String QUESTION_HOME_PAGE_LIST = "question:homePage:list";
+
 
 
 
@@ -133,17 +145,29 @@ public class TestController {
     }
 
     @GetMapping("redis")
-    public RespModel redis(){
-        RespModel respModel = new RespModel();
-        String str = (String)redisTemplate.opsForValue().get("test");
+    public JSONResult redis(){
+        JSONResult respModel = new JSONResult();
+        String str = (String) redisTemplate.opsForValue().get("test");
         if(str==null){
-            redisTemplate.opsForValue().set("test","test");
+
         }else{
-            System.out.println(str);
-            respModel.setData(str);
-            return respModel;
+            PageData<AppQuestionVO> pageData = com.alibaba.fastjson.JSON.parseObject(str, new TypeReference<PageData<AppQuestionVO>>() {});
+            List<AppQuestionVO> vos = pageData.getList();
+            return new JSONResult<PageData<AppQuestionVO>>().ok(new PageData<>(vos,pageData.getTotal()));
         }
         return respModel;
+    }
+
+    @GetMapping("redisV2")
+    public JSONResult redisV2(){
+        Object obj = redisUtils.get("test");
+//        if (obj != null) {
+//            PageData<AppQuestionVO> pageData = com.alibaba.fastjson.JSON.parseObject(String.valueOf(obj), new TypeReference<PageData<AppQuestionVO>>() {});
+//            List<AppQuestionVO> vos = pageData.getList();
+//            return new JSONResult<PageData<AppQuestionVO>>().ok(new PageData<>(vos,pageData.getTotal()));
+//        }
+        return new JSONResult().ok(obj);
+
     }
 
 }
