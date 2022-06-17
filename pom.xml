@@ -15,7 +15,7 @@
     </parent>
 
     <properties>
-        <fastjson.version>1.2.45</fastjson.version>
+        <fastjson.version>1.2.83</fastjson.version>
     </properties>
 
     <dependencies>
